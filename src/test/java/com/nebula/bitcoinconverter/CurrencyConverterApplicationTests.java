@@ -1,4 +1,4 @@
-package com.nebula.currencyconverter;
+package com.nebula.bitcoinconverter;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
