@@ -3,11 +3,12 @@ package com.nebula.bitcoinconverter.services.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.nebula.bitcoinconverter.models.BitCoinConversionRate;
 import com.nebula.bitcoinconverter.models.coinDesk.BitCoinPriceIndex;
 import com.nebula.bitcoinconverter.models.coinDesk.CoinDeskResponse;
 import com.nebula.bitcoinconverter.services.BitCoinPriceFetcher;
+import com.nebula.bitcoinconverter.utils.CoinDeskUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
@@ -29,15 +30,19 @@ public class USDBitCoinPriceFetcherService implements BitCoinPriceFetcher {
 
         ResponseEntity<String> responseEntity = callCoinDeskApi(coinDeskApiUrl);
 
-        if (responseEntity.getStatusCode()!= HttpStatus.OK){
+        if (responseEntity.getStatusCode() != HttpStatus.OK) {
             //TODO Add Server Error Exception
             throw new RuntimeException();
         }
 
-        Gson gson = new Gson();
-        BitCoinPriceIndex bitCoinPriceIndex = gson.fromJson(responseEntity.getBody(), BitCoinPriceIndex.class);
+        if(StringUtils.isEmpty(responseEntity.getBody())){
+            //TODO Add Server Error Exception
+            throw new RuntimeException();
+        }
 
-        return new BitCoinConversionRate(bitCoinPriceIndex);
+        CoinDeskResponse coinDeskResponse = CoinDeskUtil.unmarshalJson(responseEntity.getBody());
+
+        return new BitCoinConversionRate(coinDeskResponse.getBitCoinPriceIndex());
 
     }
 
@@ -80,14 +85,5 @@ public class USDBitCoinPriceFetcherService implements BitCoinPriceFetcher {
                 "        }\n" +
                 "    }\n" +
                 "}";
-
-        ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        CoinDeskResponse coinDeskResponse;
-        try {
-            coinDeskResponse = mapper.readValue(json, CoinDeskResponse.class);
-            System.out.println(coinDeskResponse.getBitCoinPriceIndex().getUsd().getRateFloat());
-        }catch (JsonProcessingException ex){
-        }
     }
 }

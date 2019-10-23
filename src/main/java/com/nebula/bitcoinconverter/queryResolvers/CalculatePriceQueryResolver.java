@@ -1,8 +1,10 @@
 package com.nebula.bitcoinconverter.queryResolvers;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import com.nebula.bitcoinconverter.models.BitCoinConversionRate;
 import com.nebula.bitcoinconverter.models.OperationType;
 import com.nebula.bitcoinconverter.services.BitCoinPriceFetcher;
+import com.nebula.bitcoinconverter.utils.ConversionUtil;
 
 
 public class CalculatePriceQueryResolver implements GraphQLQueryResolver {
@@ -15,13 +17,13 @@ public class CalculatePriceQueryResolver implements GraphQLQueryResolver {
 
     public double calculatePrice(OperationType operationType, Double margin, Double exchangeRate) {
 
-        bitCoinPriceFetcher.getBitCoinConversionRate();
+        BitCoinConversionRate bitCoinConversionRate = bitCoinPriceFetcher.getBitCoinConversionRate();
 
         switch (operationType){
             case buy:
-                return 1.0;
+                return ConversionUtil.calculateBuyPrice(exchangeRate, margin, bitCoinConversionRate);
             case sell:
-                return 2.0;
+                return ConversionUtil.calculateSellPrice(exchangeRate, margin, bitCoinConversionRate);
         }
         throw new IllegalArgumentException();
     }
