@@ -80,8 +80,8 @@
 					</includes>
 					<jdkVersion>${java.version}</jdkVersion>
 					<processTypes>
-						<web>java $JAVA_OPTS -jar ${project.build.directory}/${project.build.finalName}.jar
-							-Dserver.port=$PORT $JAR_OPTS
+						<web>java $JAVA_OPTS -jar target/bitcoin-converter-0.0.1-SNAPSHOT.jar --server.port=$PORT
+							$JAR_OPTS
 						</web>
 					</processTypes>
 				</configuration>
