@@ -10,6 +10,9 @@ public class BitCoinConversionRate {
         this.setRate(bitCoinPriceIndex.getUsd().getRateFloat());
     }
 
+    public BitCoinConversionRate() {
+    }
+
     private String currencyCode;
 
     private String currencySymbol;
@@ -36,7 +39,7 @@ public class BitCoinConversionRate {
         return rate;
     }
 
-    private void setRate(double rate) {
+    public void setRate(double rate) {
         this.rate = rate;
     }
 }

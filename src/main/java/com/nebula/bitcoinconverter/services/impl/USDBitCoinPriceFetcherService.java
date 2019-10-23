@@ -1,19 +1,20 @@
 package com.nebula.bitcoinconverter.services.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nebula.bitcoinconverter.exceptions.ApiException;
 import com.nebula.bitcoinconverter.models.BitCoinConversionRate;
-import com.nebula.bitcoinconverter.models.coinDesk.BitCoinPriceIndex;
+import com.nebula.bitcoinconverter.models.api.ResponseCode;
 import com.nebula.bitcoinconverter.models.coinDesk.CoinDeskResponse;
 import com.nebula.bitcoinconverter.services.BitCoinPriceFetcher;
 import com.nebula.bitcoinconverter.utils.CoinDeskUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -23,21 +24,21 @@ public class USDBitCoinPriceFetcherService implements BitCoinPriceFetcher {
     @Value("${coin-desk-api-url:https://api.coindesk.com/v1/bpi/currentprice.json}")
     private String coinDeskApiUrl;
 
+    private Logger logger = LoggerFactory.getLogger(USDBitCoinPriceFetcherService.class);
+
     @Override
     public BitCoinConversionRate getBitCoinConversionRate() {
-
-        testMapping();
 
         ResponseEntity<String> responseEntity = callCoinDeskApi(coinDeskApiUrl);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
-            //TODO Add Server Error Exception
-            throw new RuntimeException();
+            logger.error(ResponseCode.A1.getMessage());
+            throw new ApiException(ResponseCode.A1);
         }
 
-        if(StringUtils.isEmpty(responseEntity.getBody())){
-            //TODO Add Server Error Exception
-            throw new RuntimeException();
+        if (StringUtils.isEmpty(responseEntity.getBody())) {
+            logger.error(ResponseCode.A2.getMessage());
+            throw new ApiException(ResponseCode.A2);
         }
 
         CoinDeskResponse coinDeskResponse = CoinDeskUtil.unmarshalJson(responseEntity.getBody());
@@ -46,44 +47,17 @@ public class USDBitCoinPriceFetcherService implements BitCoinPriceFetcher {
 
     }
 
-    //TODO Add test to ensure endpoint is up
     private ResponseEntity<String> callCoinDeskApi(String coinDeskApiUrl) {
-        RestTemplate restTemplate = new RestTemplate();
-        return restTemplate.getForEntity(coinDeskApiUrl, String.class);
-    }
+        ResponseEntity<String> responseEntity;
 
-    private void testMapping() {
-        String json = "{\n" +
-                "    \"time\": {\n" +
-                "        \"updated\": \"Oct 22, 2019 10:14:00 UTC\",\n" +
-                "        \"updatedISO\": \"2019-10-22T10:14:00+00:00\",\n" +
-                "        \"updateduk\": \"Oct 22, 2019 at 11:14 BST\"\n" +
-                "    },\n" +
-                "    \"disclaimer\": \"This data was produced from the CoinDesk Bitcoin Price Index (USD). Non-USD currency data converted using hourly conversion rate from openexchangerates.org\",\n" +
-                "    \"chartName\": \"Bitcoin\",\n" +
-                "    \"bpi\": {\n" +
-                "        \"USD\": {\n" +
-                "            \"code\": \"USD\",\n" +
-                "            \"symbol\": \"&#36;\",\n" +
-                "            \"rate\": \"8,290.1350\",\n" +
-                "            \"description\": \"United States Dollar\",\n" +
-                "            \"rate_float\": 8290.135\n" +
-                "        },\n" +
-                "        \"GBP\": {\n" +
-                "            \"code\": \"GBP\",\n" +
-                "            \"symbol\": \"&pound;\",\n" +
-                "            \"rate\": \"6,410.8692\",\n" +
-                "            \"description\": \"British Pound Sterling\",\n" +
-                "            \"rate_float\": 6410.8692\n" +
-                "        },\n" +
-                "        \"EUR\": {\n" +
-                "            \"code\": \"EUR\",\n" +
-                "            \"symbol\": \"&euro;\",\n" +
-                "            \"rate\": \"7,439.1278\",\n" +
-                "            \"description\": \"Euro\",\n" +
-                "            \"rate_float\": 7439.1278\n" +
-                "        }\n" +
-                "    }\n" +
-                "}";
+        try {
+            responseEntity = new RestTemplate().getForEntity(coinDeskApiUrl, String.class);
+
+        } catch (ResourceAccessException exception) {
+            logger.error(ResponseCode.A3.getMessage());
+            throw new ApiException(ResponseCode.A3);
+        }
+
+        return responseEntity;
     }
 }

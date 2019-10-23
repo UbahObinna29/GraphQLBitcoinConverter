@@ -13,9 +13,7 @@ public class ConversionUtil {
 
         double computedMarginPrice = conversionRate.getRate() - marginPrice;
 
-        double customConvertedPrice = computedMarginPrice * exchangeRate;
-
-        return convertToNairaAmount(exchangeRate, customConvertedPrice);
+        return convertToNairaAmount(exchangeRate, computedMarginPrice);
     }
 
     public static double calculateBuyPrice(double exchangeRate, double margin, BitCoinConversionRate conversionRate) {
@@ -24,9 +22,7 @@ public class ConversionUtil {
 
         double computedMarginPrice = conversionRate.getRate() + marginPrice;
 
-        double customConvertedPrice = computedMarginPrice * exchangeRate;
-
-        return convertToNairaAmount(exchangeRate, customConvertedPrice);
+        return convertToNairaAmount(exchangeRate, computedMarginPrice);
     }
 
     private static double convertToNairaAmount(double exchangeRate, double amount){

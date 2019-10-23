@@ -12,15 +12,16 @@ public class CoinDeskUtil {
 
     private static Logger logger = LoggerFactory.getLogger(CoinDeskUtil.class);
 
-    public static CoinDeskResponse unmarshalJson(String json){
+    public static CoinDeskResponse unmarshalJson(String json) {
         ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.writerWithDefaultPrettyPrinter();
 
         CoinDeskResponse coinDeskResponse = null;
         try {
             coinDeskResponse = mapper.readValue(json, CoinDeskResponse.class);
-            System.out.println(coinDeskResponse.getBitCoinPriceIndex().getUsd().getRateFloat());
-        }catch (JsonProcessingException ex){
-            logger.error("Unable to unmarshall JSON to POJO",ex);
+            logger.info("Unmarshalled JSON ::: {}", mapper.writeValueAsString(coinDeskResponse));
+        } catch (JsonProcessingException ex) {
+            logger.error("Unable to unmarshall JSON to POJO", ex);
         }
 
         return coinDeskResponse;
