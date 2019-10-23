@@ -2,14 +2,21 @@ package com.nebula.bitcoinconverter.queryResolvers;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
 import com.nebula.bitcoinconverter.models.OperationType;
+import com.nebula.bitcoinconverter.services.BitCoinPriceFetcher;
 
 
 public class CalculatePriceQueryResolver implements GraphQLQueryResolver {
 
-    public CalculatePriceQueryResolver() {
+    private BitCoinPriceFetcher bitCoinPriceFetcher;
+
+    public CalculatePriceQueryResolver(BitCoinPriceFetcher bitCoinPriceFetcher) {
+        this.bitCoinPriceFetcher = bitCoinPriceFetcher;
     }
 
     public double calculatePrice(OperationType operationType, Double margin, Double exchangeRate) {
+
+        bitCoinPriceFetcher.getBitCoinConversionRate();
+
         switch (operationType){
             case buy:
                 return 1.0;
