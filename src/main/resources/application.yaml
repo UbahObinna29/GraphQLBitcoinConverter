@@ -16,3 +16,6 @@ graphiql:
     basePath: /
   enabled: true
   pageTitle: GraphiQL
+
+server:
+  port: ${PORT:8080}
